@@ -1,0 +1,20 @@
+#sudo pip3 install pyshark snort
+import pyshark
+import snort
+interface = "eth0"
+snort_config = "/etc/snort/snort.conf"
+snort_obj = snort.Snort(snort_config)
+capture = pyshark.LiveCapture(interface=interface)
+for packet in capture:
+    snort_packet = snort_obj.packet_to_snort(packet)
+
+    alerts = snort_obj.analyze(snort_packet)
+    if alerts:
+        # Print the alert information
+        for alert in alerts:
+            print(f"Alert: {alert['msg']}")
+capture.close()
+sudo nano /etc/snort/rules/local.rules
+alert icmp any any -> any any (msg:"ICMP Echo Request"; sid:1000001; rev:1;)
+sudo hping3 -I eth0 -c 1 -s 8.8.8.8
+alert tcp any any -> any 80 (msg:"HTTP Request to /admin.php"; sid:1000002; rev:1;)
